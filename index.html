@@ -4,24 +4,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello world</title>
+    <title>Playground</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
             background: black;
+            font-family: monospace;
+            color: #0F0;
         }
 
         canvas {
             display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .terminal {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            /* width: 600px; */
+            max-width: 90%;
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            opacity: 0; /* Set initial opacity to 0 */
+            transition: opacity 1s ease-in-out; /* Add transition effect */
+        }
+
+        .terminal pre {
+            margin: 0;
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 16px;
+            background: #0F0;
+            margin-left: 5px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
         }
     </style>
 </head>
 
 <body>
     <canvas id="matrixCanvas"></canvas>
+    <div class="terminal" id="terminal">
+        <!--<pre>Hello There</pre>-->
+        <div id="output"></div>
+        <div class="input-line">
+            <pre>$ <span id="input"></span></pre>
+            <div class="cursor"></div>
+        </div>
+    </div>
 
     <script>
+        // ::::::::::::::::::::::::::::::: animation background
         const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -30,37 +85,163 @@
 
         const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789あいうえおカキクケコ";
         const fontSize = 16;
-        const columns = canvas.width / fontSize;
-
-        const drops = Array(Math.floor(columns)).fill(0);
+        const columns = Math.floor(canvas.width / fontSize);
+        const drops = new Array(columns).fill(0);
 
         function drawMatrix() {
             ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
             ctx.fillStyle = "#0F0";
             ctx.font = `${fontSize}px monospace`;
 
-            for (let i = 0; i < drops.length; i++) {
+            drops.forEach((y, i) => {
                 const text = letters[Math.floor(Math.random() * letters.length)];
                 const x = i * fontSize;
-                const y = drops[i] * fontSize;
-
                 ctx.fillText(text, x, y);
-
-                if (y > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
-
-                drops[i]++;
-            }
+                drops[i] = y > canvas.height && Math.random() > 0.975 ? 0 : y + fontSize;
+            });
         }
 
         setInterval(drawMatrix, 50);
 
+        // :::::::::::::::::::::::::::::::
+
         window.addEventListener('resize', () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+        });
+
+        const DataService = (function () {
+            let data = null; // Private variable to store JSON data
+            let promise = null; // To prevent duplicate requests
+
+            async function fetchData() {
+                if (!promise) {
+                    promise = fetch('./powerfull_websites_you_should_know.json')
+                    .then(response => response.json())
+                        .then(res => {
+                            data = res[0];
+                            return data;
+                        })
+                        .catch(error => {
+                            console.error("Error fetching data:", error);
+                            throw error;
+                        });
+                }
+                return promise;
+            }
+
+            return {
+                getData: async function () {
+                    return data ? Promise.resolve(data) : fetchData();
+                }
+            };
+        })();
+
+        // Show terminal
+        document.getElementById('terminal').style.opacity = '1';
+
+        setTimeout(() => {
+            typeTextInput("welcome");     
+        }, 1000);
+
+        const inputElem = document.getElementById('input');
+        const outputElem = document.getElementById('output');
+        let userInput = "";
+
+
+        const commands = {
+            welcome: () => {
+                const welcomeMessage = "I'm Renato and this is an experimental playground.\nNot really sure what will came out from here...\nIt could be just random things I would like to share.\nHope you find it enjoyable!";
+                typeTextOutput(welcomeMessage);
+            },
+            help: () => {
+                typeTextOutput(`Available commands:\n- clear: clear the console output\n- random: prints a random web page info`);
+            },
+            clear: () => {
+                outputElem.innerHTML = "";
+            },
+            random: () => {
+                DataService.getData().then(data => {
+                    printWebsiteInfo(data[Math.floor(Math.random() * data.length)]);
+                });
+            },
+        };
+
+        function typeTextOutput(text) {
+            const outputElem = document.getElementById('output');
+            let i = 0;
+
+            // Check if the text is a valid JSON
+            let jsonObject;
+            try {
+                jsonObject = JSON.parse(text);
+            } catch (e) {
+                jsonObject = null;
+            }
+
+            // If it's a valid JSON, beautify it
+            if (jsonObject) {
+                text = JSON.stringify(jsonObject, null, 2);
+            }
+
+            const interval = setInterval(() => {
+                if (text[i] === '\n') {
+                    outputElem.innerHTML += '<br>';
+                } else if (text[i] === ' ') {
+                    outputElem.innerHTML += '&nbsp;';
+                } else {
+                    outputElem.innerHTML += text[i];
+                }
+                i++;
+                if (i > text.length - 1) {
+                    clearInterval(interval);
+                }
+            }, 30);
+        }
+
+        function typeTextInput(text) {
+            const inputElem = document.getElementById('input');
+            const outputElem = document.getElementById('output');
+            let i = 0;
+            const interval = setInterval(() => {
+                inputElem.textContent += text[i];
+                i++;
+                if (i > text.length - 1) {
+                    clearInterval(interval);
+                    inputElem.textContent = "";
+                    outputElem.innerHTML += `<pre>$ ${text}</pre>`;
+                    if (commands[text]) {
+                        commands[text]();
+                    }
+                }
+            }, 30);
+        }
+
+        function printWebsiteInfo(website) {
+            const outputElem = document.getElementById('output');
+            outputElem.innerHTML += `<pre>${website.description}</pre>`;
+            //output website.url as clickable white colored link open in new tab
+            outputElem.innerHTML += `<pre><a href="${website.url}" target="_blank" style="color: white;">${website.url}</a></pre>`;
+        }
+
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Enter") {
+                outputElem.innerHTML += `<pre>$ ${userInput}</pre>`;
+                const command = userInput.trim();
+                if (commands[command]) {
+                    commands[command]();
+                }
+                userInput = "";
+                inputElem.textContent = "";
+            } else if (e.key === "Backspace") {
+                userInput = userInput.slice(0, -1);
+                inputElem.textContent = userInput;
+            } else if (e.key.length === 1) {
+                userInput += e.key;
+                inputElem.textContent = userInput;
+            }
         });
     </script>
 </body>
