@@ -152,7 +152,7 @@
 
         const commands = {
             welcome: () => {
-                const welcomeMessage = "I'm Renato and this is an experimental playground.\nNot sure what will come out from here...\nIt could be just random things I would like to share.\nHope you find it enjoyable!";
+                const welcomeMessage = "I'm Renato and this is an experimental playground.\n";
                 typeTextOutput(welcomeMessage);
             },
             help: () => {
@@ -166,6 +166,9 @@
                     printWebsiteInfo(data[Math.floor(Math.random() * data.length)]);
                 });
             },
+            battle: () => {
+                window.location.href = "battle.html";
+            }
         };
 
         function typeTextOutput(text) {
