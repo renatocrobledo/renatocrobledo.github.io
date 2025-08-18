@@ -1,4 +1,3 @@
-
 // Game State
 let gameState = 'playing'; // 'playing', 'gameOverTransition', 'gameOver'
 
@@ -159,7 +158,89 @@ class EnemyMissile { constructor(pos, angle) { this.pos = pos.copy(); this.vel =
 function drawGameOver() { background(10, 20, 40, 50); fill(255, 0, 0); textSize(80); text('GAME OVER', width / 2, height / 2 - 50); fill(255); textSize(40); text(`Final Score: ${score}`, width / 2, height / 2 + 20); textSize(24); text('Click to Restart', width / 2, height / 2 + 80); }
 function restartGame() { shuttlePos = createVector(width / 2, height / 2); shuttleVel = createVector(0, 0); cameraPos = createVector(width / 2, height / 2); playerHealth = MAX_PLAYER_HEALTH; playerIsAlive = true; multiShotCharges = 0; kamikazes = []; tanks = []; enemyMissiles = []; smokeParticles = []; explosionParticles = []; sparkParticles = []; activeMissiles = []; powerUps = []; score = 0; waveNumber = 0; if (stars.length === 0) { for (let i = 0; i < 600; i++) stars.push(new Star()); } gameState = 'playing'; }
 function drawShuttle(throttle, health) { noStroke(); let flameSize = lerp(0.8, 1.7, throttle); for (let i = -1; i <= 1; i += 2) { let engineX = i * 20; fill(255, 180, 0, 150); triangle(engineX, 40, engineX - 10 * flameSize, 40 + 20 * flameSize, engineX + 10 * flameSize, 40 + 20 * flameSize); fill(255, 220, 0, 200); triangle(engineX, 40, engineX - 6 * flameSize, 40 + 30 * flameSize, engineX + 6 * flameSize, 40 + 30 * flameSize); } stroke(100, 110, 120); strokeWeight(2); fill(60, 70, 80); beginShape(); vertex(0, -60); vertex(20, -10); vertex(20, 30); vertex(10, 50); vertex(-10, 50); vertex(-20, 30); vertex(-20, -10); endShape(CLOSE); fill(90, 100, 110); quad(-20, -5, -60, 10, -60, 30, -20, 25); quad(20, -5, 60, 10, 60, 30, 20, 25); fill(50, 60, 70); rect(-40, 5, 12, 30); rect(40, 5, 12, 30); noStroke(); fill(40); ellipse(-40, -10, 10, 10); ellipse(40, -10, 10, 10); stroke(100, 110, 120); fill(45, 55, 65); rect(-20, 38, 18, 25); rect(20, 38, 18, 25); fill(0, 200, 255, 200); stroke(200, 255, 255); beginShape(); vertex(0, -45); vertex(12, -25); vertex(0, -20); vertex(-12, -25); endShape(CLOSE); noStroke(); fill(150, 0, 0); triangle(40, 15, 50, 15, 45, 25); triangle(-40, 15, -50, 15, -45, 25); if (health < 3) { noStroke(); fill(20, 20, 20, 180); beginShape(); vertex(20, -10); vertex(40, 5); vertex(30, 20); vertex(15, 15); endShape(CLOSE); } if (health < 2) { noStroke(); fill(20, 20, 20, 180); rect(-35, 12, 30, 8); stroke(0, 150, 180, 100); strokeWeight(1.5); line(0, -45, -5, -28); } }
-function drawHUD() { fill(255); textSize(32); textAlign(LEFT, TOP); text(`Score: ${score}`, 20, 20); for (let i = 0; i < playerHealth; i++) { drawHealthIcon(30 + i * 40, 70); } if (multiShotCharges > 0) { textAlign(RIGHT, TOP); fill(255, 100, 50); text(`Tri-Shot x${multiShotCharges}`, width - 20, 20); } }
+function drawHUD() {
+    fill(255);
+    textSize(32);
+    textAlign(LEFT, TOP);
+    text(`Score: ${score}`, 20, 20);
+
+    for (let i = 0; i < playerHealth; i++) {
+        drawHealthIcon(30 + i * 40, 70);
+    }
+
+    if (multiShotCharges > 0) {
+        textAlign(RIGHT, TOP);
+        fill(255, 100, 50);
+        text(`Tri-Shot x${multiShotCharges}`, width - 20, 20);
+    }
+    drawRadar();
+}
+
+function drawRadar() {
+    let radarX = width - 100;
+    let radarY = height - 10;
+    let radarRadius = 80;
+    let radarWorldRange = 3000;
+
+    push();
+    translate(radarX, radarY);
+
+    // Draw radar semi-circle background (arc pointing up)
+    fill(0, 50, 100, 150);
+    stroke(0, 150, 255, 200);
+    strokeWeight(2);
+    arc(0, 0, radarRadius * 2, radarRadius * 2, PI, TWO_PI, PIE);
+
+    // Draw grid lines
+    stroke(0, 150, 255, 100);
+    strokeWeight(1);
+    line(0, 0, 0, -radarRadius); // Forward
+    line(0, 0, radarRadius * cos(PI + PI / 4), radarRadius * sin(PI + PI / 4));
+    line(0, 0, radarRadius * cos(TWO_PI - PI / 4), radarRadius * sin(TWO_PI - PI / 4));
+    noFill();
+    arc(0, 0, radarRadius * 1.5, radarRadius * 1.5, PI, TWO_PI);
+    arc(0, 0, radarRadius, radarRadius, PI, TWO_PI);
+    arc(0, 0, radarRadius * 0.5, radarRadius * 0.5, PI, TWO_PI);
+
+    // Plot enemies
+    let enemies = [...kamikazes, ...tanks, ...enemyMissiles];
+    let shuttleAngle = atan2(mouseY - (height / 2), mouseX - (width / 2));
+
+    for (let enemy of enemies) {
+        let relativePos = p5.Vector.sub(enemy.pos, shuttlePos);
+        let distance = relativePos.mag();
+
+        if (distance < radarWorldRange) {
+            let enemyAngle = relativePos.heading();
+            let relativeAngle = enemyAngle - shuttleAngle;
+
+            // Normalize angle to be between -PI and PI
+            while (relativeAngle <= -PI) relativeAngle += TWO_PI;
+            while (relativeAngle > PI) relativeAngle -= TWO_PI;
+
+            // Check if the enemy is in the forward 180-degree arc
+            if (abs(relativeAngle) <= PI / 2) {
+                let radarDist = map(distance, 0, radarWorldRange, 0, radarRadius);
+
+                // Calculate dot position: 0 angle is forward (up), PI/2 is right, -PI/2 is left
+                let dotX = radarDist * sin(relativeAngle);
+                let dotY = -radarDist * cos(relativeAngle);
+
+                fill(255, 0, 0);
+                noStroke();
+                ellipse(dotX, dotY, 5, 5);
+            }
+        }
+    }
+
+    // Draw player ship icon at the center, pointing up
+    fill(0, 255, 100);
+    noStroke();
+    triangle(0, 2, -4, -2, 4, -2);
+
+    pop();
+}
+
 function drawHealthIcon(x, y) { push(); translate(x, y); scale(0.4); rotate(-PI / 4); noStroke(); fill(90, 100, 110); beginShape(); vertex(0, -30); vertex(15, 10); vertex(-15, 10); endShape(CLOSE); rect(0, 18, 40, 10); pop(); }
 class SparkParticle { constructor(sP) { this.start = sP.copy().add(random(-20, 20), random(-30, 30)); this.end = this.start.copy().add(random(-15, 15), random(-15, 15)); this.life = 50; } isFinished() { return this.life < 0; } update() { this.life -= 5; } show() { stroke(200, 255, 255, this.life * 5); strokeWeight(random(1, 2.5)); line(this.start.x, this.start.y, this.end.x, this.end.y); } }
 function getSpawnPosition(p) { let a = random(TWO_PI); let r = max(width, height); return createVector(p.x + r * cos(a), p.y + r * sin(a)); }
