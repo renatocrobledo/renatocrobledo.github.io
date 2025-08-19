@@ -127,7 +127,6 @@
         const drops = new Array(columns).fill(canvas.height);
 
         function drawMatrix() {
-            // change the background of the canvas to white
             ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = "#16a5ff";
@@ -186,52 +185,43 @@
 
         const TYPING_ANIMATION = true;
 
+        const test = { 
+            a: async () => {
+                await typeTextOutput("Hello World", TYPING_ANIMATION);
+                await typeTextOutput("This is a test of the typing animation.", TYPING_ANIMATION);
+                await typeTextOutput("You can type commands in the input box below.", TYPING_ANIMATION);
+            }
+        };
+
+
         const commands = {
-            init: () => {
+            init: async () => {
                 // Detect lang
                 const language = navigator.language || navigator.userLanguage;
-                const lang = 'spa';//language.startsWith('es') ? 'spa' : 'eng';
+                const lang = language.startsWith('es') ? 'spa' : 'eng';
 
-                typeTextOutput(`* detected or guessed language: ${lang}`)
-                .then(() => {
-                    typeTextOutput("* fetching translations file...");
-                })
-                .then(fetchTranslations)
-                .then(translations => {
-                    // for each translations key extract the "lang" value
-                    for (const key in translations) {
-                        if (translations.hasOwnProperty(key)) {
-                            const value = translations[key][lang];
-                            if (value) {
-                                GLOBAL_TRANSLATIONS[key] = value;
-                            }
+                await typeTextOutput(`* detected or guessed language: ${lang}`);
+                await typeTextOutput("* fetching translations file...");
+                const translations = await fetchTranslations();
+                for (const key in translations) {
+                    if (translations.hasOwnProperty(key)) {
+                        const value = translations[key][lang];
+                        if (value) {
+                            GLOBAL_TRANSLATIONS[key] = value;
                         }
                     }
-                })
-                .then(() => {
-                    return typeTextOutput("#############################", TYPING_ANIMATION)
-                })
-                .then(()=>{
-                    typeTextOutput(GLOBAL_TRANSLATIONS.translationsApplied);
-                })
-                .then(()=> {
-                    typeTextInput("help");
-                });
+                }
+                await typeTextOutput("#############################", TYPING_ANIMATION);
+                await typeTextOutput(GLOBAL_TRANSLATIONS.translationsApplied);
+                typeTextInput("help");
 
             },
-            help: () => {
+            help: async () => {
                 const welcomeMessage = GLOBAL_TRANSLATIONS.helpWelcomeMessage;
-                typeTextOutput(welcomeMessage, TYPING_ANIMATION)
-                .then(()=> {
-                    typeTextOutput("");
-                })
-                .then(()=>{
-                    typeTextOutput(getClickableCommands());
-                })
-                .then(() => {
-                    typeTextOutput("");
-                });
-
+                await typeTextOutput(welcomeMessage, TYPING_ANIMATION);
+                await typeTextOutput("");
+                await typeTextOutput(getClickableCommands());
+                await typeTextOutput("");
             },
             credits: () => {
 
