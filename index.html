@@ -45,7 +45,8 @@
             top: 5%;
             left: 50%;
             transform: translateX(-50%);
-            /* width: 600px; */
+            max-height: 80%;
+            overflow-y: auto;
             max-width: 90%;
             background: rgba(0, 0, 0, 0.9);
             border-radius: 10px;
@@ -129,7 +130,7 @@
             // change the background of the canvas to white
             ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#c0c0c0";
+            ctx.fillStyle = "#16a5ff";
             ctx.font = `${fontSize}px monospace`;
 
             drops.forEach((y, i) => {
@@ -141,8 +142,28 @@
         }
 
         setInterval(drawMatrix, 50);
+        // :::::::::::::::::::::::::::::::::::::::
 
-        // :::::::::::::::::::::::::::::::
+        let GLOBAL_TRANSLATIONS = {};
+
+        function fetchTranslations() {
+            return new Promise((resolve, reject) => {
+                //request translations.json
+                fetch('./translations.json')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        resolve(data);
+                    })
+                    .catch(error => {
+                        reject(error);
+                    });
+            });
+        }
 
         window.addEventListener('resize', () => {
             canvas.width = window.innerWidth;
@@ -153,9 +174,11 @@
         document.getElementById('terminal').style.opacity = '1';
 
         setTimeout(() => {
-            typeTextInput("help");     
+            typeTextInput("init");     
             //typeTextInput("credits");     
         }, 2000);
+
+        
 
         const inputElem = document.getElementById('input');
         const outputElem = document.getElementById('output');
@@ -163,16 +186,50 @@
 
         const TYPING_ANIMATION = true;
 
-
         const commands = {
+            init: () => {
+                // Detect lang
+                const language = navigator.language || navigator.userLanguage;
+                const lang = 'spa';//language.startsWith('es') ? 'spa' : 'eng';
+
+                typeTextOutput(`* detected or guessed language: ${lang}`)
+                .then(() => {
+                    typeTextOutput("* fetching translations file...");
+                })
+                .then(fetchTranslations)
+                .then(translations => {
+                    // for each translations key extract the "lang" value
+                    for (const key in translations) {
+                        if (translations.hasOwnProperty(key)) {
+                            const value = translations[key][lang];
+                            if (value) {
+                                GLOBAL_TRANSLATIONS[key] = value;
+                            }
+                        }
+                    }
+                })
+                .then(() => {
+                    return typeTextOutput("#############################", TYPING_ANIMATION)
+                })
+                .then(()=>{
+                    typeTextOutput(GLOBAL_TRANSLATIONS.translationsApplied);
+                })
+                .then(()=> {
+                    typeTextInput("help");
+                });
+
+            },
             help: () => {
-                const welcomeMessage = "Hello there, here are some commands available. you can click on those too if you prefer...";
+                const welcomeMessage = GLOBAL_TRANSLATIONS.helpWelcomeMessage;
                 typeTextOutput(welcomeMessage, TYPING_ANIMATION)
                 .then(()=> {
-                    typeTextOutput("<br /><br />");
+                    typeTextOutput("");
                 })
                 .then(()=>{
                     typeTextOutput(getClickableCommands());
+                })
+                .then(() => {
+                    typeTextOutput("");
                 });
 
             },
@@ -180,20 +237,26 @@
 
                 const myPhoto = "<img src='./5854784.jpeg'>";
 
-                typeTextOutput(`<p>Hi, I'm Renato,</p>${myPhoto}<p>A curious man who likes computers and software.</p><p>Born and raised in Guadalajara Jalisco, Mexico.</p><p>Welcome to my terminal!</p>`);
+                const { 
+                    aboutMeTitle, 
+                    imACuriousFolk,
+                    bornAndRaised,
+                    welcomeToMyTerminal
+                 } = GLOBAL_TRANSLATIONS;
+                
+                typeTextOutput(`<p>${aboutMeTitle}</p>${myPhoto}<p>${imACuriousFolk}</p><p>${bornAndRaised}</p><p>${welcomeToMyTerminal}</p>`);
             },
             battle: () => {
                 window.location.href = "battle.html";
             }
         };
 
-
-        const commandDescriptor = {
-            battle: "Launch your shuttle into space and prepare for survive!",
-            credits: "Who made this?"
-        };
-
         function getClickableCommands() {
+            const commandDescriptor = {
+                battle: GLOBAL_TRANSLATIONS.launchYourShuttle,
+                credits: GLOBAL_TRANSLATIONS.whoMadeThis
+            };
+            
             const commandList = Object.keys(commandDescriptor);
             return commandList.map(cmd => `<span class="clickable-command" onClick="typeTextInput('${cmd}')">${cmd}: ${commandDescriptor[cmd]} </span>`).join("<br />");
         }
@@ -224,12 +287,14 @@
                         outputElem.innerHTML += text[i];
                         i++;
                         if (i > text.length - 1) {
+                            outputElem.innerHTML += "<br />";
                             clearInterval(interval);
                             resolve();
                         }
                     }, 30);
                 } else {
                     outputElem.innerHTML += text;
+                    outputElem.innerHTML += "<br />";
                     resolve();
                 }
 

@@ -1,0 +1,42 @@
+{
+    "helpWelcomeMessage": {
+        "eng": "Hello there, here are some commands available. you can click on those too if you prefer...",
+        "spa": "Que Onda, aquí hay algunos comandos disponibles. También puedes darle click si lo prefieres..."
+    },
+    "fetchingTranslations": {
+        "eng": "* fetching translations file...",
+        "spa": "* buscando archivo de traducciones..."
+    },
+    "translationsApplied": {
+        "eng": "* translations applied...",
+        "spa": "* traducciones aplicadas..."
+    },
+    "aboutMeTitle": {
+        "eng": "Hi, I'm Renato,",
+        "spa": "Hola, soy Renato,"
+    },
+    "imACuriousFolk": {
+        "eng": "I'm a curious man who likes computers and software.",
+        "spa": "Soy un bato curioso que le mueve a las computadoras y al software."
+    },
+    "bornAndRaised": {
+        "eng": "Born and raised in Guadalajara Jalisco, Mexico.",
+        "spa": "Nací y crecí en Guadalajara Jalisco, México."
+    },
+    "welcomeToMyTerminal": {
+        "eng": "Welcome to my terminal!",
+        "spa": "Te doy la bienvenida a mi terminal!"
+    },
+    "launchYourShuttle": {
+        "eng": "Launch your shuttle into space and prepare for survive!",
+        "spa": "Montate en tu nave, lanzate al espacio y preparate para sobrevivir..."
+    },
+    "disclaimer": {
+        "eng": "all rights and lefts reserved",
+        "spa": "todos los derechos e izquierdos bien puestos."
+    },
+    "whoMadeThis": {
+        "eng": "Who made this?",
+        "spa": "Quien hizo este desmadre?"
+    }
+}
