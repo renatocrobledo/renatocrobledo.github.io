@@ -190,6 +190,7 @@
                 // Detect lang
                 const language = navigator.language || navigator.userLanguage;
                 const lang = language.startsWith('es') ? 'spa' : 'eng';
+                //const lang = 'spa'; //Forcing to spanish
 
                 await typeTextOutput(`* detected or guessed language: ${lang}`);
                 await typeTextOutput("* fetching translations file...");

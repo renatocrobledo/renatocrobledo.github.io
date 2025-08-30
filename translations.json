@@ -1,7 +1,7 @@
 {
     "helpWelcomeMessage": {
         "eng": "Hello there, here are some commands available. you can click on those too if you prefer...",
-        "spa": "Que Onda, aquí hay algunos comandos disponibles. También puedes darle click si lo prefieres..."
+        "spa": "Que show, aquí hay algunos comandos disponibles. También puedes darle click si lo prefieres..."
     },
     "fetchingTranslations": {
         "eng": "* fetching translations file...",
@@ -12,31 +12,31 @@
         "spa": "* traducciones aplicadas..."
     },
     "aboutMeTitle": {
-        "eng": "Hi, I'm Renato,",
-        "spa": "Hola, soy Renato,"
+        "eng": "Hi, I'm Renato.",
+        "spa": "Hola, soy Renato."
     },
     "imACuriousFolk": {
-        "eng": "I'm a curious man who likes computers and software.",
-        "spa": "Soy un bato curioso que le mueve a las computadoras y al software."
+        "eng": "I'm a curious man who rides a Suzuki V-Strom, I appreciate good conversations, music created with soul and passion, dogs (I own two big ones), a good cup of coffee, a good book, I enjoy sunny days with some clouds here and there.",
+        "spa": "Soy un bato curioso que anda en motocicleta por la vida. Aprecio las buenas conversaciones, la música hecha con el alma, los perros (tengo dos perrotas), una buena taza de café, un buen libro, me laten los días soleados, que tengan una que otra nubesilla por ahí."
     },
     "bornAndRaised": {
-        "eng": "Born and raised in Guadalajara Jalisco, Mexico.",
-        "spa": "Nací y crecí en Guadalajara Jalisco, México."
+        "eng": "Born and raised in Jalisco, México.",
+        "spa": "Nací y crecí en Jalisco, México."
     },
     "welcomeToMyTerminal": {
         "eng": "Welcome to my terminal!",
         "spa": "Te doy la bienvenida a mi terminal!"
     },
     "launchYourShuttle": {
-        "eng": "Launch your shuttle into space and prepare for survive!",
-        "spa": "Montate en tu nave, lanzate al espacio y preparate para sobrevivir..."
+        "eng": "Launch your shuttle into space and prepare for survive... [there is no return yet]",
+        "spa": "Montate en tu nave y preparate para sobrevivir... [una vez allí no hay vuelta atrás]"
     },
     "disclaimer": {
         "eng": "all rights and lefts reserved",
         "spa": "todos los derechos e izquierdos bien puestos."
     },
     "whoMadeThis": {
-        "eng": "Who made this?",
-        "spa": "Quien hizo este desmadre?"
+        "eng": "Who is doing this?",
+        "spa": "Quien está haciendo este desmadre?"
     }
 }
